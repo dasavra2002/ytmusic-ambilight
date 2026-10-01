@@ -8,6 +8,8 @@
   --ytm-ambilight-saturate: 1.5;
   --ytm-ambilight-opacity: 0.95;
   --ytm-ambilight-bg-opacity: 0;
+  --ytm-ambilight-pulse-scale: 1;
+  --ytm-ambilight-pulse-opacity: 1;
 }
 
 /* 1. LOCK SCROLL ONLY WHEN EXPANDED PLAYER SCREEN IS OPEN (Never freeze homescreen or miniplayer!) */
@@ -64,9 +66,9 @@ ytmusic-player-page[player-page-open]:not([player-ui-state="MINIPLAYER"]) ytmusi
   position: absolute;
   top: 50%;
   left: 50%;
-  -webkit-transform: translate(-50%, -50%) scale(var(--ytm-ambilight-spread, 1.18));
-  -moz-transform: translate(-50%, -50%) scale(var(--ytm-ambilight-spread, 1.18));
-  transform: translate(-50%, -50%) scale(var(--ytm-ambilight-spread, 1.18));
+  -webkit-transform: translate(-50%, -50%) scale(calc(var(--ytm-ambilight-spread, 1.18) * var(--ytm-ambilight-pulse-scale, 1)));
+  -moz-transform: translate(-50%, -50%) scale(calc(var(--ytm-ambilight-spread, 1.18) * var(--ytm-ambilight-pulse-scale, 1)));
+  transform: translate(-50%, -50%) scale(calc(var(--ytm-ambilight-spread, 1.18) * var(--ytm-ambilight-pulse-scale, 1)));
   pointer-events: none;
   z-index: 1 !important;
   border-radius: 20px;
@@ -74,8 +76,8 @@ ytmusic-player-page[player-page-open]:not([player-ui-state="MINIPLAYER"]) ytmusi
   display: none !important; /* Hidden by default unless full player is open */
   align-items: center;
   justify-content: center;
-  -webkit-transition: -webkit-transform 0.2s ease, opacity 0.3s ease;
-  transition: transform 0.2s ease, opacity 0.3s ease;
+  -webkit-transition: -webkit-transform 0.08s ease-out, opacity 0.3s ease;
+  transition: transform 0.08s ease-out, opacity 0.3s ease;
   will-change: transform, filter, opacity;
   -webkit-backface-visibility: hidden;
   backface-visibility: hidden;
@@ -100,7 +102,7 @@ body.ytm-player-open #ytm-ambilight-edge-wrapper:not(.ytm-ambilight-hidden) {
           brightness(var(--ytm-ambilight-brightness, 1.25))
           contrast(var(--ytm-ambilight-contrast, 1.15))
           saturate(var(--ytm-ambilight-saturate, 1.5));
-  opacity: var(--ytm-ambilight-opacity, 0.95);
+  opacity: calc(var(--ytm-ambilight-opacity, 0.95) * var(--ytm-ambilight-pulse-opacity, 1));
   pointer-events: none;
   will-change: filter, opacity;
   -webkit-transform: translateZ(0);
@@ -157,4 +159,50 @@ ytmusic-player[player-ui-state="MINIPLAYER"] ~ #ytm-ambilight-edge-wrapper,
 [player-ui-state="MINIPLAYER"] #ytm-ambilight-page-bg,
 .ytm-ambilight-hidden {
   display: none !important;
+}
+
+/* 6. ON-SCREEN HUD TOAST NOTIFICATION (Hotkey Alt+A feedback) */
+#ytm-ambilight-hud-toast {
+  position: fixed !important;
+  top: 76px !important;
+  left: 50% !important;
+  transform: translateX(-50%) translateY(-12px) !important;
+  background: rgba(18, 18, 18, 0.88) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  border-radius: 30px !important;
+  padding: 8px 18px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  color: #f1f1f1 !important;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  letter-spacing: -0.1px !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6) !important;
+  z-index: 9999999 !important;
+  pointer-events: none !important;
+  opacity: 0 !important;
+  transition: opacity 0.22s cubic-bezier(0.16, 1, 0.3, 1), transform 0.22s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+#ytm-ambilight-hud-toast.ytm-hud-show {
+  opacity: 1 !important;
+  transform: translateX(-50%) translateY(0) !important;
+}
+
+.ytm-hud-dot {
+  width: 8px !important;
+  height: 8px !important;
+  border-radius: 50% !important;
+  background: #666 !important;
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.4) !important;
+  transition: background 0.2s ease, box-shadow 0.2s ease !important;
+}
+
+.ytm-hud-dot.ytm-hud-active {
+  background: #ff0033 !important;
+  box-shadow: 0 0 10px #ff0033 !important;
 }

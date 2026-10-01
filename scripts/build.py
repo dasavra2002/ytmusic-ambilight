@@ -13,6 +13,7 @@ DIST_DIR = os.path.join(ROOT_DIR, "dist")
 
 EXTENSION_FILES = [
     "manifest.json",
+    "background.js",
     "content.js",
     "content.css",
     "popup.html",
@@ -37,7 +38,7 @@ def build_userscript():
     header = """// ==UserScript==
 // @name         Ambient Light for YouTube Music™
 // @namespace    https://music.youtube.com/
-// @version      1.0.0
+// @version      1.1.0
 // @description  Immersive Ambilight glow for YouTube Music (music videos & album covers).
 // @author       Anirban Das
 // @match        https://music.youtube.com/*

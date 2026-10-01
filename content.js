@@ -8,9 +8,10 @@
 
   console.log('[YTM Ambilight] Initializing extension...');
 
-  // Configuration defaults: Pure edge ambilight glow by default
+  // Configuration defaults
   const DEFAULT_CONFIG = {
     enabled: true,
+    preset: 'vibrant',
     blur: 60,
     spread: 1.18,
     brightness: 125,
@@ -19,7 +20,9 @@
     opacity: 95,
     bgGlow: false,
     bgOpacity: 35,
-    fps: 30
+    fps: 30,
+    audioReactive: false,
+    pulseSensitivity: 25
   };
 
   let config = { ...DEFAULT_CONFIG };
@@ -39,6 +42,15 @@
   let currentVideoElement = null;
   let cachedMediaSessionImg = null;
   let lastArtworkUrl = '';
+  let hudTimeout = null;
+
+  // Audio Reactivity Engine State
+  let audioCtx = null;
+  let audioSourceNode = null;
+  let audioAnalyserNode = null;
+  let audioFreqBuffer = null;
+  let hookedVideoEl = null;
+  let smoothedBass = 0;
 
   const browserAPI = typeof browser !== 'undefined' && browser.runtime ? browser : (typeof chrome !== 'undefined' ? chrome : null);
 
@@ -46,6 +58,7 @@
     loadSettings(() => {
       setupDOM();
       setupObservers();
+      setupKeyboardShortcuts();
       startLoop();
       console.log('[YTM Ambilight] Started successfully.');
     });
@@ -115,6 +128,11 @@
       pageBgWrapper.classList.toggle('ytm-ambilight-hidden', !config.enabled || !config.bgGlow);
     }
 
+    if (!config.audioReactive) {
+      root.style.setProperty('--ytm-ambilight-pulse-scale', '1');
+      root.style.setProperty('--ytm-ambilight-pulse-opacity', '1');
+    }
+
     removeResidualBarClasses();
   }
 
@@ -123,6 +141,156 @@
       const els = document.querySelectorAll('.ytm-ambilight-bar-glow');
       els.forEach(el => el.classList.remove('ytm-ambilight-bar-glow'));
     } catch (e) {}
+  }
+
+  function showHudToast(text, isActive) {
+    let hud = document.getElementById('ytm-ambilight-hud-toast');
+    if (!hud) {
+      hud = document.createElement('div');
+      hud.id = 'ytm-ambilight-hud-toast';
+      hud.innerHTML = '<span class="ytm-hud-dot"></span><span class="ytm-hud-label"></span>';
+      document.body.appendChild(hud);
+    }
+    const dot = hud.querySelector('.ytm-hud-dot');
+    const label = hud.querySelector('.ytm-hud-label');
+    if (label) label.textContent = text;
+    if (dot) dot.classList.toggle('ytm-hud-active', !!isActive);
+
+    hud.classList.remove('ytm-hud-show');
+    void hud.offsetWidth; // Force CSS reflow
+    hud.classList.add('ytm-hud-show');
+
+    if (hudTimeout) clearTimeout(hudTimeout);
+    hudTimeout = setTimeout(() => {
+      if (hud) hud.classList.remove('ytm-hud-show');
+    }, 1800);
+  }
+
+  function toggleAmbilight() {
+    config.enabled = !config.enabled;
+    if (browserAPI && browserAPI.storage) {
+      const area = browserAPI.storage.sync || browserAPI.storage.local;
+      if (area) {
+        try {
+          area.set({ enabled: config.enabled });
+        } catch (e) {
+          if (browserAPI.storage.local) browserAPI.storage.local.set({ enabled: config.enabled });
+        }
+      }
+    }
+    applyConfigToCSS();
+    showHudToast(config.enabled ? 'Ambilight: On' : 'Ambilight: Off', config.enabled);
+  }
+
+  function setupKeyboardShortcuts() {
+    // 1. Direct in-page keydown listener (works in userscripts & all extensions)
+    window.addEventListener('keydown', (e) => {
+      if (e.altKey && (e.code === 'KeyA' || e.key === 'a' || e.key === 'A')) {
+        const tag = e.target ? e.target.tagName : '';
+        if (tag === 'INPUT' || tag === 'TEXTAREA' || (e.target && e.target.isContentEditable)) {
+          return;
+        }
+        e.preventDefault();
+        toggleAmbilight();
+      }
+    }, true);
+
+    // 2. Command listener from background service worker (native browser shortcuts)
+    if (browserAPI && browserAPI.runtime && browserAPI.runtime.onMessage) {
+      try {
+        browserAPI.runtime.onMessage.addListener((msg) => {
+          if (msg && msg.type === 'TOGGLE_AMBILIGHT') {
+            toggleAmbilight();
+          }
+        });
+      } catch (err) {}
+    }
+  }
+
+  function initAudioReactivity(video) {
+    if (!video || hookedVideoEl === video) return;
+    if (!config.audioReactive) return;
+
+    try {
+      const AudioCtxClass = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtxClass) return;
+
+      if (!audioCtx) {
+        audioCtx = new AudioCtxClass();
+      }
+
+      // Resume on user interaction if context starts suspended
+      if (audioCtx.state === 'suspended') {
+        const unlock = () => {
+          if (audioCtx && audioCtx.state === 'suspended') {
+            audioCtx.resume().catch(() => {});
+          }
+        };
+        window.addEventListener('click', unlock, { once: true });
+        window.addEventListener('keydown', unlock, { once: true });
+      }
+
+      // Connect media element source only once per HTMLVideoElement
+      if (!audioSourceNode) {
+        audioSourceNode = audioCtx.createMediaElementSource(video);
+        audioAnalyserNode = audioCtx.createAnalyser();
+        audioAnalyserNode.fftSize = 64;
+        audioAnalyserNode.smoothingTimeConstant = 0.65;
+        audioFreqBuffer = new Uint8Array(audioAnalyserNode.frequencyBinCount);
+
+        audioSourceNode.connect(audioAnalyserNode);
+        audioAnalyserNode.connect(audioCtx.destination);
+        hookedVideoEl = video;
+      }
+    } catch (err) {
+      // Audio element might already be connected or cross-origin restricted
+      console.warn('[YTM Ambilight] Audio reactivity attachment note:', err.message);
+    }
+  }
+
+  function processAudioPulse(video) {
+    const root = document.documentElement;
+
+    if (!config.audioReactive || !config.enabled) {
+      if (smoothedBass > 0.001) {
+        smoothedBass = 0;
+        root.style.setProperty('--ytm-ambilight-pulse-scale', '1');
+        root.style.setProperty('--ytm-ambilight-pulse-opacity', '1');
+      }
+      return;
+    }
+
+    if (video && !hookedVideoEl) {
+      initAudioReactivity(video);
+    }
+
+    if (audioCtx && audioCtx.state === 'suspended' && video && !video.paused) {
+      audioCtx.resume().catch(() => {});
+    }
+
+    let rawBass = 0;
+    if (audioAnalyserNode && audioFreqBuffer && video && !video.paused && !video.ended) {
+      try {
+        audioAnalyserNode.getByteFrequencyData(audioFreqBuffer);
+        const bassSum = (audioFreqBuffer[0] || 0) + (audioFreqBuffer[1] || 0) + (audioFreqBuffer[2] || 0);
+        rawBass = bassSum / (3 * 255);
+      } catch (e) {
+        rawBass = 0;
+      }
+    }
+
+    smoothedBass = smoothedBass * 0.7 + rawBass * 0.3;
+
+    if (smoothedBass > 0.01) {
+      const intensity = (config.pulseSensitivity || 25) / 100;
+      const pulseScale = 1.0 + (smoothedBass * intensity * 0.14);
+      const pulseOpacity = 1.0 + (smoothedBass * intensity * 0.16);
+      root.style.setProperty('--ytm-ambilight-pulse-scale', pulseScale.toFixed(3));
+      root.style.setProperty('--ytm-ambilight-pulse-opacity', pulseOpacity.toFixed(3));
+    } else {
+      root.style.setProperty('--ytm-ambilight-pulse-scale', '1');
+      root.style.setProperty('--ytm-ambilight-pulse-opacity', '1');
+    }
   }
 
   function setupDOM() {
@@ -352,8 +520,6 @@
     return null;
   }
 
-
-
   // Check if sample canvas has non-black visual content
   function hasVisualContent(ctx, w, h) {
     try {
@@ -379,6 +545,9 @@
     const video = currentVideoElement && currentVideoElement.isConnected ?
                   currentVideoElement :
                   (currentVideoElement = document.querySelector('video.html5-main-video') || document.querySelector('video'));
+
+    // Process real-time beat reactivity
+    processAudioPulse(video);
 
     let drawn = false;
 

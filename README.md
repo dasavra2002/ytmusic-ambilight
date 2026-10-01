@@ -28,12 +28,19 @@ An immersive, real-time Ambilight glow extension built specifically for **[YouTu
   - Hardware-accelerated CSS filters with an offscreen downsampling canvas (64×36 internal buffer, < 0.1ms render budget).
   - Selectable frame rates (**15 FPS, 30 FPS, 60 FPS**) to preserve laptop battery and GPU cycles.
   - Automatically pauses render loops when playback is paused or tab is hidden.
-- 🎛️ **Full Popup Control Panel**:
-  - **Glow Blur**: Fine-tune ambient light diffusion from tight glow to soft atmospheric spread (20px – 140px).
-  - **Glow Spread**: Control how far the light bleeds outwards (105% – 145%).
-  - **Brightness & Saturation**: Dial in subtle warmth or hyper-vibrant color pops.
-  - **Full Window Backdrop**: Softly illuminate the entire YouTube Music background.
-  - **Player Bar Accent Glow**: Subtle ambient lighting across the bottom playback control bar.
+- 🎛️ **Style Presets & Deep Customization**:
+  - **Vibrant**: Rich, punchy colors and glowing saturation.
+  - **Cinematic**: Expansive, atmospheric backlight for full immersion.
+  - **Subtle**: Gentle, soft halo that doesn't distract.
+  - **Monochrome**: Elegant silver/desaturated aura.
+  - **Custom Sliders**: Fine-tune blur (20px – 140px), spread (105% – 145%), brightness, and saturation.
+- 🎵 **Beat-Synced Audio Reactivity (Bass Pulse)**:
+  - Optional Web Audio API frequency analysis that pulses the ambient halo to the rhythm of bass drops and sub-bass beats.
+  - Configurable pulse sensitivity slider with automatic smoothing.
+- ⌨️ **Instant Keyboard Shortcut with On-Screen HUD**:
+  - Press <kbd>Alt</kbd> + <kbd>A</kbd> (or <kbd>Option</kbd> + <kbd>A</kbd> on macOS) to instantly toggle Ambilight on/off.
+  - Sleek translucent HUD badge indicates the current status on screen.
+  - Configurable in Chromium via `chrome://extensions/shortcuts`.
 - 📱 **Responsive & Dynamic**:
   - Uses `ResizeObserver` to instantly adapt to theater mode, sidebars (queue, lyrics, related), and native fullscreen (`F`).
 - 🌐 **Cross-Browser & Universal**:
@@ -58,13 +65,14 @@ ytmusic-ambilight/
 ├── icons/                    # Extension icons in standard sizes (16, 48, 128)
 ├── scripts/
 │   └── build.py              # Automated build & packaging script
-├── content.css               # Hardware-accelerated ambient light styling
-├── content.js                # Core Ambilight canvas sampler & DOM observer
+├── background.js             # Service worker handling global command shortcuts
+├── content.css               # Hardware-accelerated styling, pulse effects & HUD toast
+├── content.js                # Core Ambilight canvas sampler, audio analyser & hotkeys
 ├── LICENSE                   # MIT License
 ├── manifest.json             # Manifest V3 (Chrome, Brave, Edge, Firefox)
 ├── manifest.firefox-v2.json  # Manifest V2 fallback (Firefox ESR / legacy engines)
 ├── package.json              # NPM build & lint scripts
-├── popup.html                # Settings popup interface
+├── popup.html                # Settings popup interface with presets & audio toggles
 ├── popup.js                  # Settings controller & live sync
 └── README.md                 # Project documentation
 ```
@@ -116,6 +124,14 @@ Orion supports Chrome/Firefox extensions natively:
 3. Navigate to [music.youtube.com](https://music.youtube.com).
 
 *(Note: You can also compile a native Safari App Extension with full Xcode: `xcrun safari-web-extension-converter /path/to/ytmusic-ambilight`).*
+
+---
+
+## ⌨️ Keyboard Shortcuts
+
+| Shortcut | Action | Scope |
+| :--- | :--- | :--- |
+| <kbd>Alt</kbd> + <kbd>A</kbd> *(or <kbd>Option</kbd>+<kbd>A</kbd> on Mac)* | Toggle Ambilight On / Off | In-page & global (configurable via browser shortcuts) |
 
 ---
 

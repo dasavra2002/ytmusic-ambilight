@@ -117,6 +117,44 @@
       gap: 12px;
     }
 
+    .preset-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+
+    .preset-group {
+      display: flex;
+      gap: 6px;
+    }
+
+    .preset-btn {
+      flex: 1;
+      padding: 6px 0;
+      background: #2a2a2a;
+      border: 1px solid #383838;
+      color: var(--text-muted);
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: 500;
+      transition: 0.15s;
+    }
+
+    .preset-btn:hover {
+      background: #333333;
+      color: var(--text-main);
+    }
+
+    .preset-btn.active {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+
     .control-row {
       display: flex;
       flex-direction: column;
@@ -194,6 +232,22 @@
       font-size: 12px;
     }
 
+    .feature-title {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .badge-tag {
+      background: #ff0033;
+      color: white;
+      font-size: 9px;
+      font-weight: 700;
+      padding: 1px 5px;
+      border-radius: 3px;
+      letter-spacing: 0.5px;
+    }
+
     .fps-selector {
       display: flex;
       gap: 6px;
@@ -217,6 +271,30 @@
       background: var(--accent);
       color: #fff;
       border-color: var(--accent);
+    }
+
+    .shortcut-hint {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      color: var(--text-muted);
+      font-size: 11px;
+      margin-bottom: 10px;
+      padding: 7px 0;
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 6px;
+      border: 1px dashed #333333;
+    }
+
+    kbd {
+      background: #262626;
+      border: 1px solid #444;
+      border-radius: 3px;
+      padding: 1px 5px;
+      font-family: inherit;
+      font-size: 10px;
+      color: var(--text-main);
     }
 
     /* Footer */
@@ -262,6 +340,17 @@
   </div>
 
   <div class="section">
+    <!-- Presets -->
+    <div class="preset-section">
+      <div class="preset-label">Style Preset</div>
+      <div class="preset-group">
+        <button class="preset-btn active" data-preset="vibrant">Vibrant</button>
+        <button class="preset-btn" data-preset="cinematic">Cinematic</button>
+        <button class="preset-btn" data-preset="subtle">Subtle</button>
+        <button class="preset-btn" data-preset="monochrome">Mono</button>
+      </div>
+    </div>
+
     <!-- Blur Radius -->
     <div class="control-row">
       <div class="label-row">
@@ -284,9 +373,9 @@
     <div class="control-row">
       <div class="label-row">
         <span>Brightness</span>
-        <span class="val-text" id="val-brightness">120%</span>
+        <span class="val-text" id="val-brightness">125%</span>
       </div>
-      <input type="range" id="input-brightness" min="50" max="200" step="5" value="120">
+      <input type="range" id="input-brightness" min="50" max="200" step="5" value="125">
     </div>
 
     <!-- Saturation -->
@@ -295,11 +384,29 @@
         <span>Saturation</span>
         <span class="val-text" id="val-saturation">150%</span>
       </div>
-      <input type="range" id="input-saturation" min="50" max="250" step="5" value="150">
+      <input type="range" id="input-saturation" min="0" max="250" step="5" value="150">
     </div>
   </div>
 
   <div class="section">
+    <!-- Audio Reactive Toggle -->
+    <label class="checkbox-row">
+      <span class="feature-title">
+        <span>Beat-Synced Pulse</span>
+        <span class="badge-tag">BASS</span>
+      </span>
+      <input type="checkbox" id="toggle-audio-reactive">
+    </label>
+
+    <!-- Pulse Intensity Slider (visible when audio reactive is enabled) -->
+    <div class="control-row" id="row-pulse-sens" style="display: none;">
+      <div class="label-row">
+        <span>Pulse Intensity</span>
+        <span class="val-text" id="val-pulse-sens">25%</span>
+      </div>
+      <input type="range" id="input-pulse-sens" min="5" max="60" step="5" value="25">
+    </div>
+
     <!-- Ambient Background Toggle -->
     <label class="checkbox-row">
       <span>Full Window Background Glow</span>
@@ -319,9 +426,13 @@
     </div>
   </div>
 
+  <div class="shortcut-hint">
+    <span>Hotkey: <kbd>Alt</kbd> + <kbd>A</kbd> to toggle</span>
+  </div>
+
   <div class="footer">
     <button class="reset-btn" id="btn-reset">Reset to Defaults</button>
-    <span class="version-tag">v1.0.0</span>
+    <span class="version-tag">v1.1.0</span>
   </div>
 
   <script src="popup.js"></script>

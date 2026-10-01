@@ -1,11 +1,11 @@
 {
   "name": "ytmusic-ambilight",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Immersive real-time Ambilight glow for YouTube Music™",
   "main": "content.js",
   "scripts": {
     "build": "python3 scripts/build.py",
-    "lint": "node -c content.js popup.js"
+    "lint": "node -c content.js popup.js background.js"
   },
   "repository": {
     "type": "git",

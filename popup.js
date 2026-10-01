@@ -3,8 +3,36 @@
  * Universal cross-browser storage wrapper (Chrome, Edge, Firefox, Safari/Orion)
  */
 
+const PRESETS = {
+  vibrant: {
+    blur: 60,
+    spread: 1.18,
+    brightness: 125,
+    saturation: 150
+  },
+  cinematic: {
+    blur: 90,
+    spread: 1.25,
+    brightness: 110,
+    saturation: 120
+  },
+  subtle: {
+    blur: 110,
+    spread: 1.12,
+    brightness: 90,
+    saturation: 100
+  },
+  monochrome: {
+    blur: 75,
+    spread: 1.18,
+    brightness: 115,
+    saturation: 0
+  }
+};
+
 const DEFAULTS = {
   enabled: true,
+  preset: 'vibrant',
   blur: 60,
   spread: 1.18,
   brightness: 125,
@@ -12,7 +40,9 @@ const DEFAULTS = {
   opacity: 95,
   bgGlow: false,
   bgOpacity: 35,
-  fps: 30
+  fps: 30,
+  audioReactive: false,
+  pulseSensitivity: 25
 };
 
 // Unified storage wrapper with fallback from sync to local
@@ -36,7 +66,6 @@ const StorageService = {
     try {
       const result = area.get(keys, (items) => {
         if (chrome.runtime.lastError) {
-          // Fall back to local storage if sync failed (e.g. in Firefox with sync disabled)
           const localArea = this.getApi().storage.local;
           if (localArea && localArea !== area) {
             localArea.get(keys, (fallbackItems) => callback(fallbackItems || DEFAULTS));
@@ -46,7 +75,6 @@ const StorageService = {
         callback(items || DEFAULTS);
       });
 
-      // If promise-based (Firefox native browser namespace)
       if (result && typeof result.then === 'function') {
         result.then(items => callback(items || DEFAULTS)).catch(() => {
           const local = this.getApi().storage.local;
@@ -88,6 +116,7 @@ const StorageService = {
 
 document.addEventListener('DOMContentLoaded', () => {
   const toggleEnabled = document.getElementById('toggle-enabled');
+  const presetButtons = document.querySelectorAll('.preset-btn');
   const inputBlur = document.getElementById('input-blur');
   const valBlur = document.getElementById('val-blur');
   const inputSpread = document.getElementById('input-spread');
@@ -96,6 +125,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const valBrightness = document.getElementById('val-brightness');
   const inputSaturation = document.getElementById('input-saturation');
   const valSaturation = document.getElementById('val-saturation');
+  const toggleAudioReactive = document.getElementById('toggle-audio-reactive');
+  const rowPulseSens = document.getElementById('row-pulse-sens');
+  const inputPulseSens = document.getElementById('input-pulse-sens');
+  const valPulseSens = document.getElementById('val-pulse-sens');
   const toggleBgGlow = document.getElementById('toggle-bg-glow');
   const fpsButtons = document.querySelectorAll('.fps-btn');
   const btnReset = document.getElementById('btn-reset');
@@ -124,8 +157,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
     toggleBgGlow.checked = currentSettings.bgGlow;
 
+    toggleAudioReactive.checked = !!currentSettings.audioReactive;
+    rowPulseSens.style.display = currentSettings.audioReactive ? 'flex' : 'none';
+    inputPulseSens.value = currentSettings.pulseSensitivity || 25;
+    valPulseSens.textContent = `${currentSettings.pulseSensitivity || 25}%`;
+
+    updateActivePreset();
+
     fpsButtons.forEach(btn => {
       btn.classList.toggle('active', parseInt(btn.dataset.fps) === currentSettings.fps);
+    });
+  }
+
+  function updateActivePreset() {
+    presetButtons.forEach(btn => {
+      const presetKey = btn.dataset.preset;
+      const p = PRESETS[presetKey];
+      const isMatch = p &&
+        p.blur === currentSettings.blur &&
+        Math.abs(p.spread - currentSettings.spread) < 0.005 &&
+        p.brightness === currentSettings.brightness &&
+        p.saturation === currentSettings.saturation;
+
+      btn.classList.toggle('active', isMatch);
     });
   }
 
@@ -134,27 +188,78 @@ document.addEventListener('DOMContentLoaded', () => {
     StorageService.set({ [key]: value });
   }
 
+  function saveMultiple(obj) {
+    Object.assign(currentSettings, obj);
+    StorageService.set(obj);
+  }
+
+  // Preset button clicks
+  presetButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const presetKey = btn.dataset.preset;
+      const p = PRESETS[presetKey];
+      if (p) {
+        saveMultiple({
+          preset: presetKey,
+          blur: p.blur,
+          spread: p.spread,
+          brightness: p.brightness,
+          saturation: p.saturation
+        });
+        renderUI();
+      }
+    });
+  });
+
   // Event listeners
   toggleEnabled.addEventListener('change', (e) => save('enabled', e.target.checked));
 
   inputBlur.addEventListener('input', (e) => {
-    valBlur.textContent = `${e.target.value}px`;
-    save('blur', parseInt(e.target.value));
+    const val = parseInt(e.target.value);
+    valBlur.textContent = `${val}px`;
+    currentSettings.blur = val;
+    currentSettings.preset = 'custom';
+    updateActivePreset();
+    saveMultiple({ blur: val, preset: 'custom' });
   });
 
   inputSpread.addEventListener('input', (e) => {
-    valSpread.textContent = `${Math.round(e.target.value * 100)}%`;
-    save('spread', parseFloat(e.target.value));
+    const val = parseFloat(e.target.value);
+    valSpread.textContent = `${Math.round(val * 100)}%`;
+    currentSettings.spread = val;
+    currentSettings.preset = 'custom';
+    updateActivePreset();
+    saveMultiple({ spread: val, preset: 'custom' });
   });
 
   inputBrightness.addEventListener('input', (e) => {
-    valBrightness.textContent = `${e.target.value}%`;
-    save('brightness', parseInt(e.target.value));
+    const val = parseInt(e.target.value);
+    valBrightness.textContent = `${val}%`;
+    currentSettings.brightness = val;
+    currentSettings.preset = 'custom';
+    updateActivePreset();
+    saveMultiple({ brightness: val, preset: 'custom' });
   });
 
   inputSaturation.addEventListener('input', (e) => {
-    valSaturation.textContent = `${e.target.value}%`;
-    save('saturation', parseInt(e.target.value));
+    const val = parseInt(e.target.value);
+    valSaturation.textContent = `${val}%`;
+    currentSettings.saturation = val;
+    currentSettings.preset = 'custom';
+    updateActivePreset();
+    saveMultiple({ saturation: val, preset: 'custom' });
+  });
+
+  toggleAudioReactive.addEventListener('change', (e) => {
+    const isChecked = e.target.checked;
+    save('audioReactive', isChecked);
+    rowPulseSens.style.display = isChecked ? 'flex' : 'none';
+  });
+
+  inputPulseSens.addEventListener('input', (e) => {
+    const val = parseInt(e.target.value);
+    valPulseSens.textContent = `${val}%`;
+    save('pulseSensitivity', val);
   });
 
   toggleBgGlow.addEventListener('change', (e) => save('bgGlow', e.target.checked));
