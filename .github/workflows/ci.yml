@@ -1,0 +1,37 @@
+name: CI Build & Lint
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+
+    - name: Run Syntax Linting
+      run: npm run lint
+
+    - name: Run Build & Packaging
+      run: npm run build
+
+    - name: Verify Distribution Artifacts
+      run: |
+        test -f dist/ytmusic-ambilight.zip || exit 1
+        test -f dist/ytmusic-ambilight.xpi || exit 1
+        test -f dist/ytmusic-ambilight.user.js || exit 1
+        echo "All artifacts verified successfully!"
