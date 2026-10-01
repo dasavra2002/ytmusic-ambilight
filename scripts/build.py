@@ -37,13 +37,19 @@ def build_userscript():
 
     header = """// ==UserScript==
 // @name         Ambient Light for YouTube Music™
-// @namespace    https://music.youtube.com/
+// @namespace    https://github.com/dasavra2002/ytmusic-ambilight
 // @version      1.1.0
-// @description  Immersive Ambilight glow for YouTube Music (music videos & album covers).
+// @description  Immersive real-time Ambilight glow for YouTube Music (music videos & album covers) with style presets, hotkeys, and audio reactivity.
 // @author       Anirban Das
 // @match        https://music.youtube.com/*
+// @icon         https://raw.githubusercontent.com/dasavra2002/ytmusic-ambilight/main/assets/icon.png
 // @grant        GM_addStyle
 // @run-at       document-idle
+// @license      MIT
+// @homepageURL  https://github.com/dasavra2002/ytmusic-ambilight
+// @supportURL   https://github.com/dasavra2002/ytmusic-ambilight/issues
+// @downloadURL  https://raw.githubusercontent.com/dasavra2002/ytmusic-ambilight/main/dist/ytmusic-ambilight.user.js
+// @updateURL    https://raw.githubusercontent.com/dasavra2002/ytmusic-ambilight/main/dist/ytmusic-ambilight.user.js
 // ==/UserScript==
 
 (function () {
