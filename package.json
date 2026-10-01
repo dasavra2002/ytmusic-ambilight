@@ -1,0 +1,28 @@
+{
+  "name": "ytmusic-ambilight",
+  "version": "1.0.0",
+  "description": "Immersive real-time Ambilight glow for YouTube Music™",
+  "main": "content.js",
+  "scripts": {
+    "build": "python3 scripts/build.py",
+    "lint": "node -c content.js popup.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dasavra2002/ytmusic-ambilight.git"
+  },
+  "keywords": [
+    "youtube-music",
+    "ambilight",
+    "chrome-extension",
+    "firefox-addon",
+    "userscript",
+    "ambient-light"
+  ],
+  "author": "Anirban Das",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/dasavra2002/ytmusic-ambilight/issues"
+  },
+  "homepage": "https://github.com/dasavra2002/ytmusic-ambilight#readme"
+}

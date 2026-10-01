@@ -1,79 +1,168 @@
+<div align="center">
+
+<img src="assets/icon.png" alt="YouTube Music Ambilight Logo" width="96" height="96" />
+
 # Ambient Light for YouTube Music™
 
-An immersive, real-time Ambilight extension built specifically for **YouTube Music** (`music.youtube.com`).
+An immersive, real-time Ambilight glow extension built specifically for **[YouTube Music](https://music.youtube.com)** (`music.youtube.com`).
 
-Compatible across **all major browser engines**:
-- **Gecko**: Mozilla Firefox, LibreWolf, Waterfox, Floorp, Tor Browser
-- **WebKit**: Safari, Orion
-- **Chromium**: Google Chrome, Brave, Microsoft Edge, Arc, Opera, Vivaldi
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Manifest V3](https://img.shields.io/badge/Manifest-V3-success.svg)](manifest.json)
+[![Manifest V2 Supported](https://img.shields.io/badge/Firefox_MV2-Supported-orange.svg)](manifest.firefox-v2.json)
+[![Platform](https://img.shields.io/badge/Platform-Chromium%20%7C%20Firefox%20%7C%20Safari-brightgreen.svg)](#-installation-guide)
+
+<br/>
+
+<img src="assets/preview.png" alt="YouTube Music Ambilight Preview" width="100%" style="border-radius: 8px; box-shadow: 0 8px 30px rgba(0,0,0,0.5);" />
+
+</div>
 
 ---
 
 ## ✨ Features
 
-- **Dual-Mode Ambient Glow**:
-  - **Video Mode**: Real-time edge ambilight frame-by-frame projection for music videos playing on YouTube Music.
-  - **Song / Album Art Mode**: Diffused ambient glow matching the active track's album cover with smooth cross-fading when songs switch.
-- **Ultra-Low Resource Consumption**:
-  - Hardware-accelerated CSS filters with an offscreen downsampling buffer (64×36 resolution, under 0.1ms render time).
-  - FPS throttles (15 FPS, 30 FPS, 60 FPS) to conserve laptop battery and GPU cycles.
-- **Cross-Browser Universal Storage**:
-  - Seamless fallback between `browser.storage.sync` and `storage.local` across Firefox, Safari, and Chromium.
-- **Interactive Control Popup**:
-  - **Glow Blur**: Adjust the softness of the light spread (20px – 140px).
+- 🎨 **Dual-Mode Ambient Light Engine**:
+  - **Video Mode**: Real-time edge color sampling and ambient light projection for music videos playing on YouTube Music.
+  - **Album Cover Mode**: Rich diffused ambient aura extracted directly from the active track's high-resolution album cover, with butter-smooth cross-fading when tracks change.
+- ⚡ **Ultra-Efficient Performance**:
+  - Hardware-accelerated CSS filters with an offscreen downsampling canvas (64×36 internal buffer, < 0.1ms render budget).
+  - Selectable frame rates (**15 FPS, 30 FPS, 60 FPS**) to preserve laptop battery and GPU cycles.
+  - Automatically pauses render loops when playback is paused or tab is hidden.
+- 🎛️ **Full Popup Control Panel**:
+  - **Glow Blur**: Fine-tune ambient light diffusion from tight glow to soft atmospheric spread (20px – 140px).
   - **Glow Spread**: Control how far the light bleeds outwards (105% – 145%).
-  - **Brightness & Saturation Boosters**: Make subtle album covers pop with vibrant colors.
-  - **Full Window Ambient Background**: Softly illuminate the entire browser window backdrop.
-  - **Player Bar Accent Glow**: Subtle ambient lighting across the bottom playback bar.
-- **Responsive & SPA Aware**:
-  - Uses `ResizeObserver` to stay aligned with the player during theater mode, fullscreen (`F`), and side-panel (lyrics/queue) toggles.
+  - **Brightness & Saturation**: Dial in subtle warmth or hyper-vibrant color pops.
+  - **Full Window Backdrop**: Softly illuminate the entire YouTube Music background.
+  - **Player Bar Accent Glow**: Subtle ambient lighting across the bottom playback control bar.
+- 📱 **Responsive & Dynamic**:
+  - Uses `ResizeObserver` to instantly adapt to theater mode, sidebars (queue, lyrics, related), and native fullscreen (`F`).
+- 🌐 **Cross-Browser & Universal**:
+  - Works on Chromium (Chrome, Brave, Edge, Opera, Arc), Firefox & Gecko forks, and WebKit (Safari, Orion).
+  - Cross-platform storage fallbacks (`chrome.storage.sync` with `local` fallback).
 
 ---
 
-## 🚀 Installation Guide by Browser
+## 📂 Project Structure
 
-### 🦊 1. Mozilla Firefox, LibreWolf, Waterfox, Floorp
-
-1. Open Firefox and type `about:debugging` in the URL address bar and press Enter.
-2. Click on **This Firefox** in the left sidebar.
-3. In the *Temporary Extensions* section, click **Load Temporary Add-on...**.
-4. Select either:
-   - The file `/Users/anirbandas/ytmusic-ambilight/manifest.json`
-   - Or `/Users/anirbandas/ytmusic-ambilight/ytmusic-ambilight.xpi`
-5. Open [music.youtube.com](https://music.youtube.com) and enjoy!
-
-*(For older Firefox ESR releases or engines requiring Manifest V2, a dedicated `manifest.firefox-v2.json` is also provided in the directory).*
-
----
-
-### 🧭 2. Safari (macOS) & Orion
-
-#### Orion (Native WebKit Browser for Mac)
-Orion supports Chrome and Firefox extensions out-of-the-box:
-1. Open Orion, press `Cmd + ,` (Preferences) → **Extensions**.
-2. Click **Install from disk** and choose `/Users/anirbandas/ytmusic-ambilight`.
-
-#### Apple Safari
-For Safari on macOS, the cleanest and most lightweight way to run it is via a Userscript manager:
-1. Install the free, open-source [Userscripts Safari Extension](https://apps.apple.com/app/userscripts/id1463298887) (or Tampermonkey / Stay).
-2. Open the extension and add the included script:
-   - File: `/Users/anirbandas/ytmusic-ambilight/ytmusic-ambilight.user.js`
-3. Navigate to [music.youtube.com](https://music.youtube.com).
-
-*(Note: If you have full Xcode installed, you can also compile a standalone Safari App Extension by running: `xcrun safari-web-extension-converter /Users/anirbandas/ytmusic-ambilight`).*
+```text
+ytmusic-ambilight/
+├── .github/
+│   └── ISSUE_TEMPLATE/       # Bug report & feature request templates
+├── assets/
+│   ├── icon.png              # Hi-res extension branding icon
+│   └── preview.png           # Showcase screenshot for README and docs
+├── dist/
+│   ├── ytmusic-ambilight.zip     # Packaged Chromium extension (MV3)
+│   ├── ytmusic-ambilight.xpi     # Packaged Firefox add-on (MV3/MV2)
+│   └── ytmusic-ambilight.user.js # Standalone Userscript for Safari / Tampermonkey
+├── icons/                    # Extension icons in standard sizes (16, 48, 128)
+├── scripts/
+│   └── build.py              # Automated build & packaging script
+├── content.css               # Hardware-accelerated ambient light styling
+├── content.js                # Core Ambilight canvas sampler & DOM observer
+├── LICENSE                   # MIT License
+├── manifest.json             # Manifest V3 (Chrome, Brave, Edge, Firefox)
+├── manifest.firefox-v2.json  # Manifest V2 fallback (Firefox ESR / legacy engines)
+├── package.json              # NPM build & lint scripts
+├── popup.html                # Settings popup interface
+├── popup.js                  # Settings controller & live sync
+└── README.md                 # Project documentation
+```
 
 ---
 
-### 🌐 3. Chrome, Brave, Microsoft Edge, Arc, Opera
+## 🚀 Installation Guide
 
-1. Open your browser's extension settings:
+### 🌐 1. Google Chrome, Brave, Microsoft Edge, Arc, Opera
+
+#### Option A: Load Unpacked (Recommended for development)
+1. Open your browser's extension settings page:
    - **Chrome**: `chrome://extensions`
    - **Brave**: `brave://extensions`
    - **Edge**: `edge://extensions`
 2. Enable **Developer mode** (toggle in the top-right corner).
 3. Click **Load unpacked** in the top-left toolbar.
-4. Select the directory:
-   ```
-   /Users/anirbandas/ytmusic-ambilight
-   ```
+4. Select the `ytmusic-ambilight` repository root folder.
 5. Navigate to [music.youtube.com](https://music.youtube.com) and start playing music!
+
+#### Option B: Packaged ZIP
+1. Grab `dist/ytmusic-ambilight.zip` from this repository or from the [Releases](https://github.com/dasavra2002/ytmusic-ambilight/releases).
+2. Unzip it and click **Load unpacked** on the extracted folder.
+
+---
+
+### 🦊 2. Mozilla Firefox, LibreWolf, Waterfox, Floorp
+
+1. Open Firefox and type `about:debugging` in the address bar.
+2. Click **This Firefox** in the left sidebar.
+3. In the **Temporary Extensions** section, click **Load Temporary Add-on...**.
+4. Select `manifest.json` (or `dist/ytmusic-ambilight.xpi`).
+5. Open [music.youtube.com](https://music.youtube.com).
+
+*(Note: For older Firefox ESR versions requiring Manifest V2, a dedicated `manifest.firefox-v2.json` is included).*
+
+---
+
+### 🧭 3. Apple Safari (macOS) & Orion
+
+#### Orion (Native WebKit Browser for Mac)
+Orion supports Chrome/Firefox extensions natively:
+1. Open Orion, press `Cmd + ,` (Preferences) → **Extensions**.
+2. Click **Install from disk** and choose the `ytmusic-ambilight` folder.
+
+#### Apple Safari (via Userscripts Extension)
+1. Install the free, open-source [Userscripts Safari Extension](https://apps.apple.com/app/userscripts/id1463298887) (or Tampermonkey).
+2. Add the packaged userscript: [`dist/ytmusic-ambilight.user.js`](dist/ytmusic-ambilight.user.js).
+3. Navigate to [music.youtube.com](https://music.youtube.com).
+
+*(Note: You can also compile a native Safari App Extension with full Xcode: `xcrun safari-web-extension-converter /path/to/ytmusic-ambilight`).*
+
+---
+
+## 🛠️ Development & Building
+
+### Prerequisites
+- Python 3.8+ (for packaging)
+- Node.js 18+ (optional, for linting)
+
+### Build Distribution Packages
+Run the automated build script to bundle `dist/ytmusic-ambilight.zip`, `dist/ytmusic-ambilight.xpi`, and compile `dist/ytmusic-ambilight.user.js`:
+
+```bash
+# Using Python directly:
+python3 scripts/build.py
+
+# Or via npm:
+npm run build
+```
+
+### Lint JavaScript Code
+```bash
+npm run lint
+```
+
+---
+
+## 🤝 Contributing
+
+Contributions, bug reports, and suggestions are welcome!
+
+1. Fork the repository.
+2. Create your feature branch (`git checkout -b feature/amazing-feature`).
+3. Commit your changes (`git commit -m "Add some amazing feature"`).
+4. Push to the branch (`git push origin feature/amazing-feature`).
+5. Open a Pull Request.
+
+If you encounter any issues, please submit a report using the [Bug Report Template](https://github.com/dasavra2002/ytmusic-ambilight/issues/new?template=bug_report.md).
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+<div align="center">
+Made with ❤️ for music lovers. Not affiliated with Google LLC or YouTube Music™.
+</div>
