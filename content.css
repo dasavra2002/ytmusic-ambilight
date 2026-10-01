@@ -1,0 +1,160 @@
+/* YouTube Music Ambilight Styles - Cross-Browser Compatible */
+
+:root {
+  --ytm-ambilight-blur: 60px;
+  --ytm-ambilight-spread: 1.18;
+  --ytm-ambilight-brightness: 1.25;
+  --ytm-ambilight-contrast: 1.15;
+  --ytm-ambilight-saturate: 1.5;
+  --ytm-ambilight-opacity: 0.95;
+  --ytm-ambilight-bg-opacity: 0;
+}
+
+/* 1. LOCK SCROLL ONLY WHEN EXPANDED PLAYER SCREEN IS OPEN (Never freeze homescreen or miniplayer!) */
+body.ytm-player-open,
+html:has(ytmusic-player-page[player-page-open]:not([player-ui-state="MINIPLAYER"])),
+body:has(ytmusic-player-page[player-page-open]:not([player-ui-state="MINIPLAYER"])) {
+  overflow: hidden !important;
+  overscroll-behavior: none !important;
+}
+
+ytmusic-player-page[player-page-open]:not([player-ui-state="MINIPLAYER"]) {
+  overflow: hidden !important;
+  overscroll-behavior: none !important;
+  --ytmusic-player-page-vertical-padding: 0px !important;
+}
+
+/* Allow the side-panel (Up Next queue, lyrics, comments) to scroll its own list smoothly */
+body.ytm-player-open ytmusic-player-page[player-page-open]:not([player-ui-state="MINIPLAYER"]) #side-panel,
+ytmusic-player-page[player-page-open]:not([player-ui-state="MINIPLAYER"]) #side-panel {
+  position: relative !important;
+  z-index: 2 !important;
+  overflow-y: auto !important;
+}
+
+body.ytm-player-open ytmusic-player-page[player-page-open]:not([player-ui-state="MINIPLAYER"]) #main-panel,
+ytmusic-player-page[player-page-open]:not([player-ui-state="MINIPLAYER"]) #main-panel {
+  position: relative !important;
+  z-index: 2 !important;
+  overflow: visible !important;
+}
+
+/* 2. PLAYER ELEVATION: Player stays crisp on top with shadow ONLY when expanded player page is open */
+body.ytm-player-open ytmusic-player-page[player-page-open]:not([player-ui-state="MINIPLAYER"]) ytmusic-player#player:not([player-ui-state="MINIPLAYER"]),
+body.ytm-player-open ytmusic-player-page[player-page-open]:not([player-ui-state="MINIPLAYER"]) #player.ytmusic-player-page:not([player-ui-state="MINIPLAYER"]),
+ytmusic-player-page[player-page-open]:not([player-ui-state="MINIPLAYER"]) ytmusic-player#player:not([player-ui-state="MINIPLAYER"]),
+ytmusic-player-page[player-page-open]:not([player-ui-state="MINIPLAYER"]) #player.ytmusic-player-page:not([player-ui-state="MINIPLAYER"]) {
+  position: relative !important;
+  z-index: 3 !important;
+  overflow: visible !important;
+  box-shadow: 0 14px 45px rgba(0, 0, 0, 0.7) !important;
+  border-radius: 12px !important;
+}
+
+body.ytm-player-open ytmusic-player-page[player-page-open]:not([player-ui-state="MINIPLAYER"]) ytmusic-player#player:not([player-ui-state="MINIPLAYER"]) #song-video,
+body.ytm-player-open ytmusic-player-page[player-page-open]:not([player-ui-state="MINIPLAYER"]) ytmusic-player#player:not([player-ui-state="MINIPLAYER"]) #song-image,
+ytmusic-player-page[player-page-open]:not([player-ui-state="MINIPLAYER"]) ytmusic-player#player:not([player-ui-state="MINIPLAYER"]) #song-video,
+ytmusic-player-page[player-page-open]:not([player-ui-state="MINIPLAYER"]) ytmusic-player#player:not([player-ui-state="MINIPLAYER"]) #song-image {
+  border-radius: 12px !important;
+  overflow: hidden !important;
+}
+
+/* 3. PURE AMBILIGHT EDGE GLOW: Diffused halo directly behind the album art / video screen */
+#ytm-ambilight-edge-wrapper {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  -webkit-transform: translate(-50%, -50%) scale(var(--ytm-ambilight-spread, 1.18));
+  -moz-transform: translate(-50%, -50%) scale(var(--ytm-ambilight-spread, 1.18));
+  transform: translate(-50%, -50%) scale(var(--ytm-ambilight-spread, 1.18));
+  pointer-events: none;
+  z-index: 1 !important;
+  border-radius: 20px;
+  overflow: visible !important;
+  display: none !important; /* Hidden by default unless full player is open */
+  align-items: center;
+  justify-content: center;
+  -webkit-transition: -webkit-transform 0.2s ease, opacity 0.3s ease;
+  transition: transform 0.2s ease, opacity 0.3s ease;
+  will-change: transform, filter, opacity;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+
+/* Display edge glow ONLY when expanded player page is open and glow is enabled */
+body.ytm-player-open ytmusic-player-page[player-page-open]:not([player-ui-state="MINIPLAYER"]) #ytm-ambilight-edge-wrapper:not(.ytm-ambilight-hidden),
+body.ytm-player-open #main-panel:not([player-ui-state="MINIPLAYER"]) #ytm-ambilight-edge-wrapper:not(.ytm-ambilight-hidden),
+body.ytm-player-open #ytm-ambilight-edge-wrapper:not(.ytm-ambilight-hidden) {
+  display: flex !important;
+}
+
+#ytm-ambilight-edge-canvas {
+  width: 100%;
+  height: 100%;
+  border-radius: 20px;
+  -webkit-filter: blur(var(--ytm-ambilight-blur, 60px))
+                  brightness(var(--ytm-ambilight-brightness, 1.25))
+                  contrast(var(--ytm-ambilight-contrast, 1.15))
+                  saturate(var(--ytm-ambilight-saturate, 1.5));
+  filter: blur(var(--ytm-ambilight-blur, 60px))
+          brightness(var(--ytm-ambilight-brightness, 1.25))
+          contrast(var(--ytm-ambilight-contrast, 1.15))
+          saturate(var(--ytm-ambilight-saturate, 1.5));
+  opacity: var(--ytm-ambilight-opacity, 0.95);
+  pointer-events: none;
+  will-change: filter, opacity;
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+}
+
+/* 4. OPTIONAL BACKGROUND GLOW: Off by default so top space remains native clean black */
+#ytm-ambilight-page-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0 !important;
+  overflow: hidden !important;
+  display: none !important;
+  opacity: var(--ytm-ambilight-bg-opacity, 0);
+  -webkit-transition: opacity 0.4s ease;
+  transition: opacity 0.4s ease;
+  will-change: opacity;
+  -webkit-mask-image: radial-gradient(ellipse 70% 60% at 35% 50%, rgba(0, 0, 0, 0.9) 20%, rgba(0, 0, 0, 0) 75%);
+  mask-image: radial-gradient(ellipse 70% 60% at 35% 50%, rgba(0, 0, 0, 0.9) 20%, rgba(0, 0, 0, 0) 75%);
+}
+
+body.ytm-player-open ytmusic-player-page[player-page-open]:not([player-ui-state="MINIPLAYER"]) #ytm-ambilight-page-bg:not(.ytm-ambilight-hidden) {
+  display: block !important;
+}
+
+#ytm-ambilight-page-canvas {
+  position: absolute;
+  top: -10%;
+  left: -10%;
+  width: 120%;
+  height: 120%;
+  -webkit-filter: blur(80px)
+                  brightness(var(--ytm-ambilight-brightness, 1.25))
+                  saturate(var(--ytm-ambilight-saturate, 1.5));
+  filter: blur(80px)
+          brightness(var(--ytm-ambilight-brightness, 1.25))
+          saturate(var(--ytm-ambilight-saturate, 1.5));
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+}
+
+/* 5. STRICT HIDING FOR MINIPLAYER AND CLOSED STATES */
+#ytm-ambilight-edge-wrapper.ytm-ambilight-hidden,
+#ytm-ambilight-page-bg.ytm-ambilight-hidden,
+body:not(.ytm-player-open) #ytm-ambilight-edge-wrapper,
+body:not(.ytm-player-open) #ytm-ambilight-page-bg,
+ytmusic-player-page:not([player-page-open]) #ytm-ambilight-edge-wrapper,
+ytmusic-player-page:not([player-page-open]) #ytm-ambilight-page-bg,
+ytmusic-player[player-ui-state="MINIPLAYER"] ~ #ytm-ambilight-edge-wrapper,
+[player-ui-state="MINIPLAYER"] #ytm-ambilight-edge-wrapper,
+[player-ui-state="MINIPLAYER"] #ytm-ambilight-page-bg,
+.ytm-ambilight-hidden {
+  display: none !important;
+}

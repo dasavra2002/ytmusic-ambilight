@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>YouTube Music Ambilight</title>
+  <style>
+    :root {
+      --bg-color: #0f0f0f;
+      --card-bg: #1c1c1c;
+      --card-border: #2a2a2a;
+      --text-main: #f1f1f1;
+      --text-muted: #aaaaaa;
+      --accent: #ff0033;
+      --accent-hover: #ff3355;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      width: 320px;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      padding: 16px;
+      font-size: 13px;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      user-select: none;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--card-border);
+    }
+
+    .title-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .logo-icon {
+      width: 22px;
+      height: 22px;
+      fill: var(--accent);
+    }
+
+    h1 {
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: -0.2px;
+    }
+
+    /* Switch */
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 40px;
+      height: 22px;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider-toggle {
+      position: absolute;
+      cursor: pointer;
+      inset: 0;
+      background-color: #383838;
+      -webkit-transition: 0.25s;
+      transition: 0.25s;
+      border-radius: 22px;
+    }
+
+    .slider-toggle:before {
+      position: absolute;
+      content: "";
+      height: 16px;
+      width: 16px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      -webkit-transition: 0.25s;
+      transition: 0.25s;
+      border-radius: 50%;
+    }
+
+    input:checked + .slider-toggle {
+      background-color: var(--accent);
+    }
+
+    input:checked + .slider-toggle:before {
+      -webkit-transform: translateX(18px);
+      transform: translateX(18px);
+    }
+
+    /* Controls */
+    .section {
+      background-color: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .control-row {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .label-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .val-text {
+      color: var(--text-main);
+      font-weight: 500;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Cross-browser range sliders (WebKit + Gecko) */
+    input[type=range] {
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
+      width: 100%;
+      background: #333333;
+      height: 4px;
+      border-radius: 2px;
+      outline: none;
+    }
+
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--text-main);
+      cursor: pointer;
+      -webkit-transition: transform 0.1s ease, background 0.1s ease;
+      transition: transform 0.1s ease, background 0.1s ease;
+    }
+
+    input[type=range]::-webkit-slider-thumb:hover {
+      -webkit-transform: scale(1.2);
+      transform: scale(1.2);
+      background: var(--accent);
+    }
+
+    input[type=range]::-moz-range-thumb {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      border: none;
+      background: var(--text-main);
+      cursor: pointer;
+      transition: transform 0.1s ease, background 0.1s ease;
+    }
+
+    input[type=range]::-moz-range-thumb:hover {
+      transform: scale(1.2);
+      background: var(--accent);
+    }
+
+    input[type=range]::-moz-range-track {
+      background: #333333;
+      height: 4px;
+      border-radius: 2px;
+    }
+
+    .checkbox-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      font-size: 12px;
+    }
+
+    .fps-selector {
+      display: flex;
+      gap: 6px;
+      margin-top: 2px;
+    }
+
+    .fps-btn {
+      flex: 1;
+      padding: 5px 0;
+      background: #2a2a2a;
+      border: 1px solid #383838;
+      color: var(--text-muted);
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: 500;
+      transition: 0.15s;
+    }
+
+    .fps-btn.active {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+
+    /* Footer */
+    .footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 6px;
+    }
+
+    .reset-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 11px;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+
+    .reset-btn:hover {
+      color: var(--text-main);
+    }
+
+    .version-tag {
+      font-size: 11px;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="title-group">
+      <svg class="logo-icon" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/>
+        <polygon points="10,8 16,12 10,16" fill="currentColor"/>
+      </svg>
+      <h1>Ambilight</h1>
+    </div>
+    <label class="switch">
+      <input type="checkbox" id="toggle-enabled" checked>
+      <span class="slider-toggle"></span>
+    </label>
+  </div>
+
+  <div class="section">
+    <!-- Blur Radius -->
+    <div class="control-row">
+      <div class="label-row">
+        <span>Glow Blur</span>
+        <span class="val-text" id="val-blur">60px</span>
+      </div>
+      <input type="range" id="input-blur" min="20" max="140" step="5" value="60">
+    </div>
+
+    <!-- Spread -->
+    <div class="control-row">
+      <div class="label-row">
+        <span>Glow Spread</span>
+        <span class="val-text" id="val-spread">118%</span>
+      </div>
+      <input type="range" id="input-spread" min="1.05" max="1.45" step="0.01" value="1.18">
+    </div>
+
+    <!-- Brightness -->
+    <div class="control-row">
+      <div class="label-row">
+        <span>Brightness</span>
+        <span class="val-text" id="val-brightness">120%</span>
+      </div>
+      <input type="range" id="input-brightness" min="50" max="200" step="5" value="120">
+    </div>
+
+    <!-- Saturation -->
+    <div class="control-row">
+      <div class="label-row">
+        <span>Saturation</span>
+        <span class="val-text" id="val-saturation">150%</span>
+      </div>
+      <input type="range" id="input-saturation" min="50" max="250" step="5" value="150">
+    </div>
+  </div>
+
+  <div class="section">
+    <!-- Ambient Background Toggle -->
+    <label class="checkbox-row">
+      <span>Full Window Background Glow</span>
+      <input type="checkbox" id="toggle-bg-glow">
+    </label>
+
+    <!-- Performance / FPS -->
+    <div class="control-row">
+      <div class="label-row">
+        <span>Video Refresh Rate</span>
+      </div>
+      <div class="fps-selector">
+        <button class="fps-btn" data-fps="15">15 FPS</button>
+        <button class="fps-btn active" data-fps="30">30 FPS</button>
+        <button class="fps-btn" data-fps="60">60 FPS</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <button class="reset-btn" id="btn-reset">Reset to Defaults</button>
+    <span class="version-tag">v1.0.0</span>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
